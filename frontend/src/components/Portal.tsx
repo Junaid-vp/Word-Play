@@ -100,6 +100,7 @@ export default function Portal() {
               if (meRes.ok) {
                 const meData = await meRes.json();
                 setUser(meData.user);
+                setUnlocked(true);
               } else {
                 localStorage.removeItem('chat_token');
               }
@@ -199,8 +200,9 @@ export default function Portal() {
 
   if (loading) {
     return (
-      <div className="w-full h-screen bg-neutral-950 flex items-center justify-center">
-        <span className="text-sm font-light text-neutral-500 tracking-widest uppercase animate-pulse">Loading Wordplay...</span>
+      <div className="w-full h-screen bg-neutral-955 flex items-center justify-center">
+        {/* Simple silent spinner for anonymous clean load state */}
+        <div className="w-5 h-5 rounded-full border-2 border-neutral-800 border-t-neutral-500 animate-spin" />
       </div>
     );
   }
