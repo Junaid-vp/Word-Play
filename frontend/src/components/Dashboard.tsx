@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import { 
   MessageSquare, UserPlus, LogOut, Send, Mic, Square, 
   Play, UserCheck, Shield, ChevronLeft, Volume2, Check, CheckCheck, Trash2,
-  Clock, Pause
+  Clock, Pause, RefreshCw
 } from 'lucide-react';
 import { encryptText, decryptText } from '@/lib/crypto';
 import { API_URL, getAuthHeaders } from '@/lib/config';
@@ -45,7 +45,7 @@ interface Conversation {
   messages: Message[];
 }
 
-export default function Dashboard({ user, onLogout }: { user: { id: string; privateAlias: string; name?: string | null }; onLogout: () => void }) {
+export default function Dashboard({ user, onLogout, onLock }: { user: { id: string; privateAlias: string; name?: string | null }; onLogout: () => void; onLock: () => void }) {
   const [activeTab, setActiveTab] = useState<'chats' | 'friends'>('chats');
   const [activeView, setActiveView] = useState<'sidebar' | 'chat'>('sidebar');
   
@@ -115,7 +115,12 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
     fetchInviteCode();
 
     // Setup Socket
-    const socket = io(API_URL);
+    const socket = io(API_URL, {
+      transports: ['websocket'],
+      auth: {
+        token: localStorage.getItem('chat_token')
+      }
+    });
     socketRef.current = socket;
 
     socket.emit('auth', { userId: user.id });
@@ -384,7 +389,10 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
     });
 
     if (res.ok) {
-      socketRef.current?.emit('conversation:delete', { conversationId: selectedConv.id });
+      socketRef.current?.emit('conversation:delete', { 
+        conversationId: selectedConv.id,
+        memberIds: selectedConv.members.map(m => m.userId)
+      });
       setSelectedConv(null);
       setActiveView('sidebar');
       fetchConversations();
@@ -525,9 +533,22 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
             <Shield className="w-5 h-5 text-emerald-400" />
             <span className="font-semibold tracking-tight uppercase text-sm text-neutral-100">{user.name || user.privateAlias}</span>
           </div>
-          <button onClick={onLogout} className="text-neutral-500 hover:text-rose-400 transition-colors p-1.5 rounded-lg hover:bg-neutral-900">
-            <LogOut className="w-4 h-4" />
-          </button>
+          <div className="flex items-center space-x-1">
+            <button 
+              onClick={onLock} 
+              className="text-neutral-500 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-neutral-900"
+              title="Panic button / Refresh decoy"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+            <button 
+              onClick={onLogout} 
+              className="text-neutral-500 hover:text-rose-400 transition-colors p-1.5 rounded-lg hover:bg-neutral-900"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Tab Switching */}
@@ -682,7 +703,14 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={onLock} 
+                  className="text-neutral-500 hover:text-white transition-colors p-2 rounded-lg hover:bg-neutral-900"
+                  title="Panic button / Refresh decoy"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </button>
                 <button 
                   onClick={handleDeleteConversation}
                   className="text-neutral-500 hover:text-rose-500 transition-colors p-2 rounded-lg hover:bg-neutral-900"

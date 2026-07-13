@@ -173,6 +173,11 @@ export default function Portal() {
     return false;
   };
 
+  const handleLock = () => {
+    localStorage.removeItem('chat_unlocked');
+    setUnlocked(false);
+  };
+
   const handleAuthenticated = (authUser: User) => {
     setUser(authUser);
   };
@@ -263,7 +268,7 @@ export default function Portal() {
             transition={{ duration: 0.8, ease: [0.64, 0.04, 0.25, 1] }}
           >
             {user ? (
-              <Dashboard user={user} onLogout={handleLogout} />
+              <Dashboard user={user} onLogout={handleLogout} onLock={handleLock} />
             ) : (
               <PrivateApp 
                 onAuthenticated={handleAuthenticated} 
