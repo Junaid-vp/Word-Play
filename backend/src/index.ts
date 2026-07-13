@@ -8,6 +8,7 @@ import path from 'path';
 import authRoutes from './routes/auth.routes';
 import friendRoutes from './routes/friend.routes';
 import conversationRoutes from './routes/conversation.routes';
+import { decryptUserId } from './config/token';
 
 dotenv.config();
 
@@ -51,6 +52,22 @@ app.use(session({
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
+
+// Bearer Token session extraction middleware
+app.use((req: any, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    const userId = decryptUserId(token);
+    if (userId) {
+      if (!req.session) {
+        req.session = {} as any;
+      }
+      req.session.userId = userId;
+    }
+  }
+  next();
+});
 
 import http from 'http';
 import { Server } from 'socket.io';

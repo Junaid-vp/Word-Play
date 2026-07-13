@@ -7,7 +7,7 @@ import {
   Clock, Pause
 } from 'lucide-react';
 import { encryptText, decryptText } from '@/lib/crypto';
-import { API_URL } from '@/lib/config';
+import { API_URL, getAuthHeaders } from '@/lib/config';
 
 interface Friend {
   id: string;
@@ -230,22 +230,30 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
   }, [messages]);
 
   async function fetchFriends() {
-    const res = await fetch(`${API_URL}/api/friend/friends`, { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api/friend/friends`, {
+      headers: getAuthHeaders()
+    });
     if (res.ok) setFriends(await res.json());
   }
 
   async function fetchPendingRequests() {
-    const res = await fetch(`${API_URL}/api/friend/friends/requests/pending`, { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api/friend/friends/requests/pending`, {
+      headers: getAuthHeaders()
+    });
     if (res.ok) setPendingReqs(await res.json());
   }
 
   async function fetchConversations() {
-    const res = await fetch(`${API_URL}/api/conversation`, { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api/conversation`, {
+      headers: getAuthHeaders()
+    });
     if (res.ok) setConversations(await res.json());
   }
 
   async function fetchInviteCode() {
-    const res = await fetch(`${API_URL}/api/friend/invite`, { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api/friend/invite`, {
+      headers: getAuthHeaders()
+    });
     if (res.ok) {
       const data = await res.json();
       setInviteCode(data.code);
@@ -255,7 +263,7 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
   const handleGenerateInvite = async () => {
     const res = await fetch(`${API_URL}/api/friend/invite`, {
       method: 'POST',
-      credentials: 'include'
+      headers: getAuthHeaders()
     });
     if (res.ok) {
       const data = await res.json();
@@ -269,9 +277,8 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
 
     const res = await fetch(`${API_URL}/api/friend/friends/request`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: friendCodeInput }),
-      credentials: 'include'
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ code: friendCodeInput })
     });
 
     if (res.ok) {
@@ -286,9 +293,8 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
   const handleRespondRequest = async (requestId: string, accept: boolean) => {
     const res = await fetch(`${API_URL}/api/friend/friends/respond`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requestId, accept }),
-      credentials: 'include'
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ requestId, accept })
     });
 
     if (res.ok) {
@@ -300,9 +306,8 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
   const handleStartChat = async (friendId: string) => {
     const res = await fetch(`${API_URL}/api/conversation`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ targetUserId: friendId }),
-      credentials: 'include'
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ targetUserId: friendId })
     });
 
     if (res.ok) {
@@ -314,7 +319,9 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
   };
 
   const loadMessages = async (convId: string) => {
-    const res = await fetch(`${API_URL}/api/conversation/${convId}/messages`, { credentials: 'include' });
+    const res = await fetch(`${API_URL}/api/conversation/${convId}/messages`, {
+      headers: getAuthHeaders()
+    });
     if (res.ok) {
       const msgs: Message[] = await res.json();
       setMessages(msgs);
@@ -373,7 +380,7 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
 
     const res = await fetch(`${API_URL}/api/conversation/${selectedConv.id}`, {
       method: 'DELETE',
-      credentials: 'include'
+      headers: getAuthHeaders()
     });
 
     if (res.ok) {
@@ -479,7 +486,7 @@ export default function Dashboard({ user, onLogout }: { user: { id: string; priv
     await fetch(`${API_URL}/api/conversation/${selectedConv.id}/voice`, {
       method: 'POST',
       body: formData,
-      credentials: 'include'
+      headers: getAuthHeaders(false)
     });
   };
 

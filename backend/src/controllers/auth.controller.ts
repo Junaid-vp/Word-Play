@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { registerUser, loginUser, recoverUser } from '../services/auth.service';
 import { z } from 'zod';
 import { prisma } from '../config/db';
+import { encryptUserId } from '../config/token';
 
 const registerSchema = z.object({
   privateAlias: z.string().min(3).max(30),
@@ -31,7 +32,8 @@ export async function handleRegister(req: Request, res: Response) {
     const { privateAlias, password, name } = registerSchema.parse(req.body);
     const { user, recoveryKey } = await registerUser(privateAlias, password, name);
     req.session.userId = user.id;
-    res.status(201).json({ user, recoveryKey });
+    const token = encryptUserId(user.id);
+    res.status(201).json({ user, recoveryKey, token });
   } catch (error: any) {
     if (error instanceof z.ZodError) {
       res.status(400).json({ error: error.issues });
@@ -46,7 +48,8 @@ export async function handleLogin(req: Request, res: Response) {
     const { privateAlias, password } = loginSchema.parse(req.body);
     const user = await loginUser(privateAlias, password);
     req.session.userId = user.id;
-    res.json({ user });
+    const token = encryptUserId(user.id);
+    res.json({ user, token });
   } catch (error: any) {
     res.status(401).json({ error: 'Invalid credentials' });
   }

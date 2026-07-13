@@ -33,8 +33,7 @@ export default function PrivateApp({ onAuthenticated, onLock }: PrivateAppProps)
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ privateAlias: alias, password, name: isRegistering ? name : undefined }),
-        credentials: 'include' // Send cookies
+        body: JSON.stringify({ privateAlias: alias, password, name: isRegistering ? name : undefined })
       });
 
       const data = await res.json();
@@ -52,6 +51,10 @@ export default function PrivateApp({ onAuthenticated, onLock }: PrivateAppProps)
           errorMessage = data.error.message;
         }
         throw new Error(errorMessage);
+      }
+
+      if (data.token) {
+        localStorage.setItem('chat_token', data.token);
       }
 
       if (isRegistering) {
