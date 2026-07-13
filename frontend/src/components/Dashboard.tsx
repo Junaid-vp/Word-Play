@@ -536,7 +536,10 @@ export default function Dashboard({ user, onLogout, onLock }: { user: { id: stri
     <div className="w-full h-full bg-neutral-950 text-neutral-200 flex flex-col md:flex-row overflow-hidden font-sans">
       {/* Sidebar */}
       <aside className={`w-full md:w-80 border-r border-neutral-900 flex flex-col bg-neutral-950/80 backdrop-blur ${activeView === 'sidebar' ? 'flex' : 'hidden md:flex'}`}>
-        <div className="p-4 border-b border-neutral-900 flex justify-between items-center bg-neutral-950">
+        <div 
+          className="px-4 pb-4 border-b border-neutral-900 flex justify-between items-center bg-neutral-950"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}
+        >
           <div className="flex items-center space-x-2">
             <Shield className="w-5 h-5 text-emerald-400" />
             <span className="font-semibold tracking-tight uppercase text-sm text-neutral-100">{user.name || user.privateAlias}</span>
@@ -710,7 +713,10 @@ export default function Dashboard({ user, onLogout, onLock }: { user: { id: stri
         {selectedConv ? (
           <>
             {/* Chat Header */}
-            <header className="p-4 border-b border-neutral-900 flex justify-between items-center bg-neutral-950">
+            <header 
+              className="px-4 pb-4 border-b border-neutral-900 flex justify-between items-center bg-neutral-950"
+              style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}
+            >
               <div className="flex items-center space-x-3">
                 <button onClick={() => setActiveView('sidebar')} className="md:hidden text-neutral-500 hover:text-white transition-colors">
                   <ChevronLeft className="w-6 h-6" />

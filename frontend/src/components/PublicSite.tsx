@@ -313,9 +313,12 @@ export default function PublicSite({ onUnlock }: { onUnlock: (c: string) => Prom
       )}
 
       {/* Decoy Nav Header */}
-      <header className={`w-full px-3 sm:px-6 py-3 sm:py-5 border-b backdrop-blur-md sticky top-0 z-30 shadow-sm ${
-        isDark ? 'border-neutral-900/60 bg-neutral-955/50' : 'border-slate-200/60 bg-white/40'
-      }`}>
+      <header 
+        className={`w-full px-3 sm:px-6 pb-3 sm:pb-5 border-b backdrop-blur-md sticky top-0 z-30 shadow-sm ${
+          isDark ? 'border-neutral-900/60 bg-neutral-955/50' : 'border-slate-200/60 bg-white/40'
+        }`}
+        style={{ paddingTop: 'calc(env(safe-area-inset-top) + 12px)' }}
+      >
         <div className="max-w-4xl mx-auto flex flex-row justify-between items-center gap-2 sm:gap-3">
           
           {/* Logo Brand Box */}
