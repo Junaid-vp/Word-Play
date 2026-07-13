@@ -55,6 +55,7 @@ export default function Dashboard({ user, onLogout, onLock }: { user: { id: stri
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
   
   const [inviteCode, setInviteCode] = useState('');
+  const [copiedInvite, setCopiedInvite] = useState(false);
   const [friendCodeInput, setFriendCodeInput] = useState('');
   const [messageInput, setMessageInput] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -264,6 +265,13 @@ export default function Dashboard({ user, onLogout, onLock }: { user: { id: stri
       setInviteCode(data.code);
     }
   }
+
+  const handleCopyInvite = () => {
+    if (!inviteCode) return;
+    navigator.clipboard.writeText(inviteCode);
+    setCopiedInvite(true);
+    setTimeout(() => setCopiedInvite(false), 2000);
+  };
 
   const handleGenerateInvite = async () => {
     const res = await fetch(`${API_URL}/api/friend/invite`, {
@@ -614,7 +622,19 @@ export default function Dashboard({ user, onLogout, onLock }: { user: { id: stri
                   <div className="flex-1 bg-neutral-900 px-3 py-2.5 rounded-lg border border-neutral-800 font-mono text-sm tracking-widest text-neutral-100 uppercase select-all">
                     {inviteCode || 'Loading...'}
                   </div>
-                  <button onClick={handleGenerateInvite} className="px-3 py-2.5 bg-neutral-900 border border-neutral-800 rounded-lg hover:bg-neutral-800 text-xs font-medium transition-colors">
+                  {inviteCode && (
+                    <button 
+                      onClick={handleCopyInvite} 
+                      className={`px-3 py-2.5 rounded-lg text-xs font-medium transition-colors border ${
+                        copiedInvite 
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                          : 'bg-neutral-900 border-neutral-800 hover:bg-neutral-800 text-neutral-300'
+                      }`}
+                    >
+                      {copiedInvite ? 'Copied' : 'Copy'}
+                    </button>
+                  )}
+                  <button onClick={handleGenerateInvite} className="px-3 py-2.5 bg-neutral-900 border border-neutral-800 rounded-lg hover:bg-neutral-800 text-xs font-medium transition-colors text-neutral-300">
                     Regen
                   </button>
                 </div>
