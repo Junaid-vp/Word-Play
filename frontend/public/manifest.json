@@ -1,0 +1,18 @@
+{
+  "name": "Wordplay - Malayalam-English Puzzles",
+  "short_name": "Wordplay",
+  "description": "Play Malayalam-English pun puzzle challenges and lateral thinking game levels.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#6366f1",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

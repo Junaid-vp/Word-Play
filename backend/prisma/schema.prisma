@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  privateAlias      String   @unique
+  name              String?
+  passwordHash      String
+  recoveryKeyHash   String
+  createdAt         DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(6)
+
+  sentRequests      FriendRequest[] @relation("SentRequests")
+  receivedRequests  FriendRequest[] @relation("ReceivedRequests")
+  friendships1      Friendship[]    @relation("User1")
+  friendships2      Friendship[]    @relation("User2")
+  inviteCodes       InviteCode[]
+  conversationMembers ConversationMember[]
+  messages          Message[]
+  messageReceipts   MessageReceipt[]
+
+  @@map("users")
+}
+
+model Session {
+  sid    String   @id @db.VarChar
+  sess   Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], name: "IDX_session_expire")
+  @@map("session")
+}
+
+model InviteCode {
+  id        BigInt   @id @default(autoincrement())
+  creatorId String   @db.Uuid
+  code      String   @unique
+  isRevoked Boolean  @default(false)
+  expiresAt DateTime @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  creator   User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  friendRequests FriendRequest[]
+
+  @@map("invite_codes")
+}
+
+model FriendRequest {
+  id           BigInt   @id @default(autoincrement())
+  senderId     String   @db.Uuid
+  receiverId   String   @db.Uuid
+  inviteCodeId BigInt
+  status       String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt    DateTime @default(now()) @db.Timestamptz(6)
+
+  sender       User       @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User       @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  inviteCode   InviteCode @relation(fields: [inviteCodeId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("friend_requests")
+}
+
+model Friendship {
+  user1Id   String   @db.Uuid
+  user2Id   String   @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  user1     User     @relation("User1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2     User     @relation("User2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  @@id([user1Id, user2Id])
+  @@map("friendships")
+}
+
+model Conversation {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  members   ConversationMember[]
+  messages  Message[]
+
+  @@map("conversations")
+}
+
+model ConversationMember {
+  conversationId String   @db.Uuid
+  userId         String   @db.Uuid
+  joinedAt       DateTime @default(now()) @db.Timestamptz(6)
+
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([conversationId, userId])
+  @@map("conversation_members")
+}
+
+model Message {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  conversationId  String   @db.Uuid
+  senderId        String   @db.Uuid
+  encryptedContent String
+  type            String   // TEXT, VOICE
+  createdAt       DateTime @default(now()) @db.Timestamptz(6)
+
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender          User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  receipts        MessageReceipt[]
+  voiceAttachment VoiceAttachment?
+
+  @@map("messages")
+}
+
+model MessageReceipt {
+  messageId String   @db.Uuid
+  userId    String   @db.Uuid
+  status    String   // DELIVERED, READ
+  timestamp DateTime @default(now()) @db.Timestamptz(6)
+
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId, status])
+  @@map("message_receipts")
+}
+
+model VoiceAttachment {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  messageId        String   @unique @db.Uuid
+  storageKey       String
+  duration         Int
+  encryptedMetadata String
+
+  message          Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@map("voice_attachments")
+}
