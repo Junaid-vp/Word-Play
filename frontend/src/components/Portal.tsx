@@ -275,7 +275,7 @@ export default function Portal() {
       </AnimatePresence>
 
       {/* Floating Install App FAB Button */}
-      {showInstallBtn && (
+      {showInstallBtn && !user && (
         <button
           onClick={handleInstallApp}
           className="fixed bottom-6 right-6 z-50 flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-3 rounded-full shadow-2xl border border-indigo-500/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 group font-semibold text-xs tracking-wider uppercase cursor-pointer"
