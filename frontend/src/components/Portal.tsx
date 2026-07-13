@@ -67,6 +67,10 @@ export default function Portal() {
   };
 
   useEffect(() => {
+    // Clear session/token instantly on mount (guarantees credentials check on every refresh)
+    localStorage.removeItem('chat_token');
+    setUser(null);
+
     let checkInterval: NodeJS.Timeout;
     let countdownInterval: NodeJS.Timeout;
 
@@ -93,8 +97,6 @@ export default function Portal() {
           } catch (e) {
             console.warn('Session clear failed:', e instanceof Error ? e.message : e);
           }
-          localStorage.removeItem('chat_token');
-          setUser(null);
 
           setLoading(false);
           return true;
