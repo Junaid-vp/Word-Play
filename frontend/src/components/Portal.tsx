@@ -26,12 +26,6 @@ export default function Portal() {
   const [showIOSPrompt, setShowIOSPrompt] = useState(false);
 
   useEffect(() => {
-    // Check if customizer is already unlocked
-    const isUnlocked = localStorage.getItem('chat_unlocked') === 'true';
-    if (isUnlocked) {
-      setUnlocked(true);
-    }
-
     // Detect iOS Device
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     setIsIOS(isIOSDevice);
@@ -90,24 +84,17 @@ export default function Portal() {
         if (res.ok) {
           setIsServerDown(false);
           
-          // Verify token and auto-login if token exists in localStorage
-          const token = localStorage.getItem('chat_token');
-          if (token) {
-            try {
-              const meRes = await fetch(`${API_URL}/api/auth/me`, {
-                headers: getAuthHeaders()
-              });
-              if (meRes.ok) {
-                const meData = await meRes.json();
-                setUser(meData.user);
-                setUnlocked(true);
-              } else {
-                localStorage.removeItem('chat_token');
-              }
-            } catch (e) {
-              console.warn('Auto-login check failed:', e);
-            }
+          // Clear session/token on load to force credentials check on every refresh
+          try {
+            await fetch(`${API_URL}/api/auth/logout`, {
+              method: 'POST',
+              headers: getAuthHeaders()
+            });
+          } catch (e) {
+            console.warn('Session clear failed:', e instanceof Error ? e.message : e);
           }
+          localStorage.removeItem('chat_token');
+          setUser(null);
 
           setLoading(false);
           return true;
@@ -165,7 +152,6 @@ export default function Portal() {
       });
       if (res.ok) {
         setUnlocked(true);
-        localStorage.setItem('chat_unlocked', 'true');
         return true;
       }
     } catch (err) {
@@ -175,7 +161,6 @@ export default function Portal() {
   };
 
   const handleLock = () => {
-    localStorage.removeItem('chat_unlocked');
     setUnlocked(false);
   };
 
@@ -193,7 +178,6 @@ export default function Portal() {
       console.warn('Logout request failed:', e);
     }
     localStorage.removeItem('chat_token');
-    localStorage.removeItem('chat_unlocked');
     setUser(null);
     setUnlocked(false);
   };
